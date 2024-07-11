@@ -3,6 +3,7 @@ import pandas as pd
 
 BOATS = 6
 FLIGHTS = 16
+EVENTS = 2
 TEAMS = ['ASVW', 'BYC(BA)', 'BYC(BE)', 'BYCÜ', 'DYC', 'FSC', 'JSC', 'KYC(BW)', 'KYC(SH)', 'MSC', 'MYC', 'NRV', 'RSN', 'SMCÜ', 'SV03', 'SVI', 'VSaW', 'WYC']
 
 BUCHSTABEN = {'OCS': BOATS+1,
