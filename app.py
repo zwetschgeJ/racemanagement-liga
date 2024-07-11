@@ -8,10 +8,6 @@ import utils
 from utils import BOATS, BUCHSTABEN
 
 
-def create_pairing_list():
-    return utils.create_pairing_list()
-
-
 app = dash.Dash(__name__, use_pages=False)
 
 server = app.server
@@ -43,6 +39,10 @@ app.layout = html.Div(id='all',
                                    style={"display": "inline-block"}),
                       ],
                       style={'font-family': 'sans-serif', })
+
+
+def create_pairing_list():
+    return utils.create_pairing_list()
 
 
 @app.callback(
@@ -174,13 +174,6 @@ def add_results(values, race, data):
 
     for b, value in zip(range(1, BOATS + 1), values):
         if value:
-            try:
-                value = int(value)
-                if value < 1 or value > 6:
-                    raise PreventUpdate
-            except ValueError:
-                if value not in BUCHSTABEN.keys():
-                    raise PreventUpdate
             team = race_details[f'Boat{b}'].values[0]
             filtered_df = result_df[result_df['Teams'] == team]
             row_index = filtered_df.index[0]

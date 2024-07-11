@@ -106,6 +106,7 @@ def sort_results(result_df):
     result_df_copy = result_df.copy()
 
     result_df_copy.replace(BUCHSTABEN, inplace=True)
+    result_df_copy.replace('-', np.nan, inplace=True)
 
     columns_to_sum = ['SCP']
     columns_to_sum.extend([f'Flight {i}' for i in range(1, FLIGHTS+1)])
