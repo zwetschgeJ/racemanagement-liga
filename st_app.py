@@ -107,7 +107,9 @@ for event in range(1, EVENTS + 1):
     result_df.insert(0, 'Rank', range(1, result_df.shape[0] + 1))
     result_df.sort_values(by='Teams', inplace=True)
     overall_results['Event {}'.format(event)] = result_df['Rank'].values
-overall_results['Total'] = overall_results.sum(axis=1)
+
+sum_columns = ['Event {}'.format(event) for event in range(1, EVENTS + 1)]
+overall_results['Total'] = overall_results[sum_columns].sum(axis=1)
 overall_results.sort_values(by=['Total','Event {}'.format(EVENTS)], inplace=True)
 try:
     overall_results.drop(columns=['Rank'], inplace=True)
