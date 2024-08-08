@@ -9,6 +9,7 @@ st.sidebar.title('Options')
 
 # Initialize session state for data storage
 if 'data' not in st.session_state:
+    print("Initializing session state")
     st.session_state.data = {f'Event {event}': {} for event in range(1, EVENTS + 1)}
 
 # BOATS = st.sidebar.number_input('Number of Boats', value=BOATS, key='BOATS')
@@ -19,10 +20,10 @@ st.sidebar.divider()
 
 # Function to create pairing list and results (mimics the generate_pairing_list callback)
 def initialize_pairing_result():
-    for event in range(1, EVENTS + 1):
-        pairing_list, results = utils.create_pairing_list()
-        st.session_state.data['Event {}'.format(event)]['pairing_list'] = pairing_list.reset_index().to_dict('split')
-        st.session_state.data['Event {}'.format(event)]['results'] = results.reset_index(drop=True).to_dict('split')
+    for event in range(EVENTS):
+        pairing_list, results = utils.create_pairing_list(event)
+        st.session_state.data['Event {}'.format(event+1)]['pairing_list'] = pairing_list.reset_index().to_dict('split')
+        st.session_state.data['Event {}'.format(event+1)]['results'] = results.reset_index(drop=True).to_dict('split')
 
 
 if st.session_state.data['Event 1'] == {}:
