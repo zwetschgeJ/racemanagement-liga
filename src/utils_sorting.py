@@ -366,10 +366,11 @@ def count_values(row):
 def sort_results(result_df):
     result_df_copy = result_df.copy()
 
-    result_df_copy.replace(BUCHSTABEN, inplace=True)
-    result_df_copy.replace('-', np.nan, inplace=True)
+    # result_df_copy.replace(BUCHSTABEN, inplace=True)
+    # result_df_copy.replace('-', np.nan, inplace=True)
 
-    columns_to_sum = ['SCP']
+    # columns_to_sum = ['SCP']
+    columns_to_sum = []
     columns_to_sum.extend([f'Flight {i}' for i in range(1, FLIGHTS + 1)])
     result_df_copy['Total'] = result_df_copy[columns_to_sum].sum(axis=1)
     counts_df = result_df_copy.apply(count_values, axis=1)

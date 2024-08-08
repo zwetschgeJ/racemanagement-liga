@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
-import utils
-from utils import BOATS, BUCHSTABEN, EVENTS
+
+from src.utils_sorting import BOATS, BUCHSTABEN, EVENTS, TEAMS, create_pairing_list, get_flight, sort_results
 
 st.set_page_config(layout="wide")
 st.title('Ergebnis-Manager')
@@ -21,7 +21,7 @@ st.sidebar.divider()
 # Function to create pairing list and results (mimics the generate_pairing_list callback)
 def initialize_pairing_result():
     for event in range(EVENTS):
-        pairing_list, results = utils.create_pairing_list(event)
+        pairing_list, results = create_pairing_list(event)
         st.session_state.data['Event {}'.format(event+1)]['pairing_list'] = pairing_list.reset_index().to_dict('split')
         st.session_state.data['Event {}'.format(event+1)]['results'] = results.reset_index(drop=True).to_dict('split')
 
@@ -56,18 +56,18 @@ if st.session_state.data[selected_event]['pairing_list'] is not None:
     # TODO: get race details based on Event information
     race_details = pairing_list_df[pairing_list_df['Race'] == selected_race]
     results = list()
-    for b in range(1,utils.BOATS+1):
+    for b in range(1,BOATS+1):
         team = race_details[f'Boat{b}'].values[0]
         results.append(st.sidebar.selectbox(f'Boat {b} - ' + team, options=[i for i in range(1, BOATS + 1)] + list(BUCHSTABEN.keys()), index=0,))
 
 
     if st.sidebar.button('Update Results'):
-        for b, r in zip(range(1,utils.BOATS+1),results):
+        for b, r in zip(range(1,BOATS+1),results):
             if r:
                 team = race_details[f'Boat{b}'].values[0]
                 filtered_df = results_df[results_df['Teams'] == team]
                 row_index = filtered_df.index[0]
-                flight = utils.get_flight(selected_race)
+                flight = get_flight(selected_race)
                 results_df.loc[row_index, f'Flight {flight}'] = r
 
         st.session_state.data[selected_event]['results'] = results_df.reset_index(drop=True).to_dict('split')
@@ -86,7 +86,7 @@ if st.session_state.data[selected_event]['results'] is not None:
                               columns=st.session_state.data[selected_event]['results']['columns'],)
     results_df.reset_index(drop=True, inplace=True)
 
-    results_df = utils.sort_results(results_df)
+    results_df = sort_results(results_df)
     try:
         results_df.drop(columns=['Rank'], inplace=True)
     except KeyError:
@@ -99,12 +99,12 @@ if st.session_state.data[selected_event]['results'] is not None:
 
 #Overall ranking
 st.text('Overall Results')
-overall_results = pd.DataFrame({'Teams': utils.TEAMS})
+overall_results = pd.DataFrame({'Teams': TEAMS})
 for event in range(1, EVENTS + 1):
     result_df = pd.DataFrame(st.session_state.data[f'Event {event}']['results']['data'],
                               columns=st.session_state.data[f'Event {event}']['results']['columns'],)
     result_df.reset_index(drop=True, inplace=True)
-    result_df = utils.sort_results(result_df)
+    result_df = sort_results(result_df)
     result_df.insert(0, 'Rank', range(1, result_df.shape[0] + 1))
     result_df.sort_values(by='Teams', inplace=True)
     overall_results['Event {}'.format(event)] = result_df['Rank'].values
