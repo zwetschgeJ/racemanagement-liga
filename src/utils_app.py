@@ -1,65 +1,91 @@
 import pandas as pd
-import streamlit as st
-# import matplotlib.pyplot as plt
-import plotly.graph_objects as go
 import numpy as np
+import streamlit as st
+import plotly.graph_objects as go
 
 from src.utils_sorting import sort_results
 
-BOATS = 6
-FLIGHTS = 16
-EVENTS = 2
-TEAMS = ['ASVW', 'BYC (BA)', 'BYC (BE)', 'BYCÜ', 'DYC', 'FSC', 'JSC', 'KYC (BW)', 'KYC (SH)', 'MSC', 'MYC', 'NRV', 'RSN', 'SMCÜ', 'SV03', 'SVI', 'VSaW', 'WYC']
-
-BUCHSTABEN = {'OCS': BOATS+1,
-              'DSQ': BOATS+1,
-              'DNF': BOATS+1,
-              'DNC': BOATS+1,}
-
-max_race_columns = 16
-race_columns = ['Flight {}'.format(i) for i in range(1,max_race_columns+1)]
+# Load confing
+from config import *
 
 
-def get_data() -> None:
-    df = pd.read_excel("./data/liga3.xlsx")
+def get_data_excel() -> None:
+    df_ = pd.read_excel("./data/liga3.xlsx")
 
-    result_df = pd.DataFrame(index=range(len(TEAMS)), columns=race_columns)
-    result_df.index = TEAMS
+    df = pd.DataFrame(index=range(len(TEAMS)), columns=race_columns)
+    df.index = TEAMS
 
-    for _, row in df.iterrows():
+    for _, row in df_.iterrows():
         values = row.values
 
-        for index, _ in result_df.iterrows():
+        for index, _ in df.iterrows():
 
             if values[0] == index:
-                result_df.loc[index] = values[1:]
+                df.loc[index] = values[1:]
 
-    return sort_results(result_df)
+    print("[INFO] Data loaded from Excel.")
+    return df
+
+
+def get_data_google(link_id: str, stupid_formatting: bool = False) -> pd.DataFrame:
+    if stupid_formatting:
+        df = pd.read_csv(
+            'https://docs.google.com/spreadsheets/d/' +
+            link_id  +
+            '/export?gid=0&format=csv',
+            skiprows=2,
+        )
+        df.drop(["Unnamed: 0", "Overall"], axis=1, inplace=True)
+
+    else:
+        df = pd.read_csv(
+            'https://docs.google.com/spreadsheets/d/' +
+            link_id  +
+            '/export?gid=0&format=csv',
+            skiprows=1,
+        )
+        df.drop(["1.", "Overall"], axis=1, inplace=True)
+    
+    columns = ["Teams", "SCP"]
+    columns.extend([f'Flight {i}' for i in range(1, FLIGHTS + 1)])
+
+    df.columns = columns
+
+    print("[INFO] Data loaded from Google Docs.")
+    return df
+
 
 def initialize_states() -> None:
-    if "data" not in st.session_state:
-        st.session_state["data"] = get_data()
+   df = get_data_google(link_id=link_event_01, stupid_formatting=True)
+   st.session_state["data_event_01"] = sort_results(result_df=df)
 
+   df = get_data_google(link_id=link_event_02)
+   st.session_state["data_event_02"] = sort_results(result_df=df)
+   
+   df = get_data_google(link_id=link_event_03)
+   st.session_state["data_event_03"] = sort_results(result_df=df)
 
 def calculate_place_flow(result_df: pd.DataFrame) -> pd.DataFrame:
-    df_sorted = pd.DataFrame()
+    df_sorted_index = pd.DataFrame()
 
     for i, name in enumerate(race_columns):
         
         df_buffer = result_df.copy()
-        df_buffer.iloc[:, (i+1):] = np.nan
+        df_buffer.iloc[:, (i+3):] = 0 #np.nan
 
-        indices = sort_results(df_buffer).index
-        df_sorted[name] = indices
+        indices = sort_results(df_buffer)["Teams"].values
+
+        df_sorted_index[name] = indices
 
     result_df_ = pd.DataFrame(index=range(len(TEAMS)), columns=race_columns)
     result_df_.index = TEAMS
 
     for club in TEAMS:
         res = []
-        for col in df_sorted.columns:
+        for col in df_sorted_index.columns:
+                        
+            s = (df_sorted_index[col] == club)
 
-            s = df_sorted[col] == club
             place = s[s].index.values[0] + 1
 
             res.append(place)
@@ -98,30 +124,43 @@ def create_flow_plot(result_df_: pd.DataFrame):
     return fig
 
 
-def create_cumulative_points(result_df_: pd.DataFrame):
-    # Create a figure
-    fig = go.Figure()
+def display_event(title: str, data_event: str) -> None:
+    st.write("### Ergebnisse " + title)
 
-    # Plot each row of result_df_ as a separate trace
-    for index, row in result_df_.iterrows():
-        fig.add_trace(go.Scatter(
-            x=row.index,
-            y=row.values,
-            mode='lines',
-            name=f'{index}',
-            # hovertemplate=f'Index: {row.index}<br>Value: %{y:.2f}<extra></extra>'
-        ))
+    data = st.session_state[data_event].astype(str)
+    data = data.replace("nan", "0")
 
-    # Update the layout of the figure
-    fig.update_layout(
-        height=800,
-        width=1200,
-        yaxis_title='Platz',
-        #yaxis=dict(autorange='reversed'),  # Reverse y-axis
-        #xaxis_tickangle=-90,  # Rotate x-axis labels
-        xaxis_title_font=dict(size=14),
-        yaxis_title_font=dict(size=14),
+    st.dataframe(
+        data,
+        height=670,
+        use_container_width=True,
+        hide_index=True
     )
 
-    # Show the plot
-    return fig
+    df_ = calculate_place_flow(data)
+
+    plot_flow = create_flow_plot(df_)
+
+    st.write("### Flow")
+    st.plotly_chart(plot_flow)
+
+
+
+def compute_overall():
+    overall_results = pd.DataFrame({'Teams': TEAMS})
+
+    for event in range(1, EVENTS+1):
+        result_df = st.session_state["data_event_0" + str(event)]
+        result_df.insert(0, 'Rank', range(1, result_df.shape[0] + 1))
+        result_df.sort_values(by='Teams', inplace=True)
+        overall_results['Event {}'.format(event)] = result_df['Rank'].values
+    
+    sum_columns = ['Event {}'.format(event) for event in range(1, EVENTS + 1)]
+    overall_results['Total'] = overall_results[sum_columns].sum(axis=1)
+    overall_results.sort_values(by=['Total','Event {}'.format(EVENTS)], inplace=True)
+    try:
+        overall_results.drop(columns=['Rank'], inplace=True)
+    except KeyError:
+        pass
+    overall_results.insert(0, 'Rank', range(1, overall_results.shape[0] + 1))
+    st.dataframe(overall_results, height=750, use_container_width=True, hide_index=True,)

@@ -1,18 +1,8 @@
 import numpy as np
 import pandas as pd
 
-BOATS = 6
-FLIGHTS = 16
-EVENTS = 6
-TEAMS = ['ASVW', 'BYC(BA)', 'BYC(BE)', 'BYCÜ', 'DYC', 'FSC', 'JSC', 'KYC(BW)', 'KYC(SH)', 'MSC', 'MYC', 'NRV', 'RSN',
-         'SMCÜ', 'SV03', 'SVI', 'VSaW', 'WYC']
-
-BUCHSTABEN = {'OCS': BOATS + 1,
-              'DSQ': BOATS + 1,
-              'DNF': BOATS + 1,
-              'DNC': BOATS + 1,
-              'No result': np.nan, }
-
+# Load confing
+from config import *
 
 def create_pairing_list(event):
     '''
@@ -363,15 +353,35 @@ def count_values(row):
     return pd.Series(counts)
 
 
+# TODO Add Multiple RDGs
+def check_for_rdg(df: pd.DataFrame) -> pd.DataFrame:
+    value = "RDG"
+
+    rows, cols = (df == value).to_numpy().nonzero()
+
+    for row, col in zip(rows, cols):
+
+        left_side_values = df.iloc[row, :col]
+        
+        mean_value = left_side_values.apply(pd.to_numeric, errors='coerce').mean()
+    
+        df.iloc[row, col] = round(mean_value, 1)
+
+    return df
+
+
 def sort_results(result_df):
     result_df_copy = result_df.copy()
 
-    # result_df_copy.replace(BUCHSTABEN, inplace=True)
-    # result_df_copy.replace('-', np.nan, inplace=True)
+    result_df_copy.replace(BUCHSTABEN, inplace=True)
+    result_df_copy.replace('-', np.nan, inplace=True)
+    result_df_copy = check_for_rdg(df=result_df_copy)
 
-    # columns_to_sum = ['SCP']
-    columns_to_sum = []
+    columns_to_sum = ['SCP']
     columns_to_sum.extend([f'Flight {i}' for i in range(1, FLIGHTS + 1)])
+
+    result_df_copy[columns_to_sum] = result_df_copy[columns_to_sum].astype('float64')
+
     result_df_copy['Total'] = result_df_copy[columns_to_sum].sum(axis=1)
     counts_df = result_df_copy.apply(count_values, axis=1)
     result_df_copy = pd.concat([result_df_copy, counts_df], axis=1, )
@@ -390,6 +400,7 @@ def sort_results(result_df):
     result_df = result_df.reindex(index)
     result_df['Total'] = result_df_copy['Total']
 
+    print("[INFO] Results computed.")
     return result_df
 
 
