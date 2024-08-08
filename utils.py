@@ -20,6 +20,7 @@ def create_pairing_list(event):
     :return: Pairing list as a pandas DataFrame
     '''
     data = [
+        # 1 - Berlin
         """Flight Race Boat 1 Boat 2 Boat 3 Boat 4 Boat 5 Boat 6
             1 RSN KYC(BW) MSC SVI BYC(BA) FSC
             2 MYC WYC NRV DYC SMCÜ SV03
@@ -70,6 +71,7 @@ def create_pairing_list(event):
             47 KYC(SH) KYC(BW) BYCÜ SVI DYC BYC(BA)
             48 JSC VSaW MYC SV03 WYC NRV
         """,
+        # 2 - Warnemünde
         """Flight Race Boat 1 Boat 2 Boat 3 Boat 4 Boat 5 Boat 6
             1 BYC(BA) SV03 WYC RSN SMCÜ ASVW
             2 NRV VSaW KYC(SH) KYC(BW) MYC FSC
@@ -120,56 +122,7 @@ def create_pairing_list(event):
             47 MSC SV03 JSC RSN KYC(BW) SMCÜ
             48 SVI DYC NRV FSC VSaW KYC(SH)
         """,
-        """Flight Race Boat 1 Boat 2 Boat 3 Boat 4 Boat 5 Boat 6
-            1 KYC(SH) BYCÜ SV03 NRV MSC SVI
-            2 VSaW FSC DYC BYC(BE) WYC JSC
-            3 KYC(BW) RSN MYC SMCÜ BYC(BA) ASVW
-            4 KYC(BW) SV03 MYC JSC SVI BYC(BE)
-            5 RSN BYC(BA) MSC FSC DYC NRV
-            6 ASVW KYC(SH) SMCÜ WYC BYCÜ VSaW
-            7 SV03 KYC(SH) FSC BYC(BA) MYC VSaW
-            8 SVI MSC BYC(BE) RSN ASVW WYC
-            9 SMCÜ JSC NRV DYC KYC(BW) BYCÜ
-            10 BYC(BE) ASVW NRV KYC(SH) KYC(BW) FSC
-            11 BYCÜ DYC RSN SVI VSaW MYC
-            12 WYC SMCÜ BYC(BA) MSC JSC SV03
-            13 BYC(BE) SMCÜ VSaW RSN NRV SV03
-            14 FSC MYC BYCÜ ASVW JSC MSC
-            15 BYC(BA) KYC(BW) SVI WYC KYC(SH) DYC
-            16 MSC KYC(BW) ASVW VSaW SV03 DYC
-            17 JSC BYC(BE) KYC(SH) BYCÜ RSN BYC(BA)
-            18 MYC NRV WYC SVI FSC SMCÜ
-            19 SV03 RSN WYC BYCÜ FSC KYC(BW)
-            20 NRV SVI JSC BYC(BA) VSaW ASVW
-            21 DYC BYC(BE) MSC MYC SMCÜ KYC(SH)
-            22 DYC SV03 RSN JSC ASVW KYC(SH)
-            23 FSC BYC(BA) SVI SMCÜ BYC(BE) BYCÜ
-            24 MSC VSaW KYC(BW) NRV WYC MYC
-            25 SMCÜ ASVW DYC SV03 SVI FSC
-            26 WYC BYCÜ BYC(BA) MYC BYC(BE) NRV
-            27 JSC MSC KYC(BW) VSaW KYC(SH) RSN
-            28 NRV WYC SV03 ASVW MYC RSN
-            29 SVI JSC KYC(SH) KYC(BW) SMCÜ FSC
-            30 BYC(BA) DYC VSaW MSC BYCÜ BYC(BE)
-            31 BYC(BA) NRV FSC MSC RSN JSC
-            32 MYC VSaW BYC(BE) KYC(BW) SV03 SVI
-            33 BYCÜ WYC ASVW KYC(SH) DYC SMCÜ
-            34 BYCÜ BYC(BE) ASVW SV03 BYC(BA) KYC(BW)
-            35 VSaW SVI SMCÜ FSC RSN MSC
-            36 KYC(SH) MYC JSC DYC NRV WYC
-            37 SMCÜ MYC JSC BYCÜ MSC SV03
-            38 ASVW NRV SVI KYC(SH) VSaW BYC(BA)
-            39 RSN FSC DYC BYC(BE) KYC(BW) WYC
-            40 MSC FSC KYC(SH) BYC(BE) ASVW MYC
-            41 JSC VSaW BYC(BA) WYC SMCÜ KYC(BW)
-            42 SV03 RSN BYCÜ DYC NRV SVI
-            43 WYC JSC BYC(BE) ASVW MSC SVI
-            44 DYC BYC(BA) KYC(BW) RSN MYC SMCÜ
-            45 FSC KYC(SH) SV03 VSaW BYCÜ NRV
-            46 RSN KYC(SH) SV03 SVI WYC BYC(BA)
-            47 KYC(BW) BYCÜ SMCÜ NRV BYC(BE) MSC
-            48 MYC ASVW VSaW JSC FSC DYC
-        """,
+        # 3 - Hotel Kieler Yacht Club
         """Flight Race Boat 1 Boat 2 Boat 3 Boat 4 Boat 5 Boat 6
             1 MYC ASVW DYC SMCÜ NRV BYCÜ
             2 MSC KYC(BW) WYC FSC KYC(SH) BYC(BE)
@@ -220,6 +173,58 @@ def create_pairing_list(event):
             47 VSaW ASVW RSN SMCÜ FSC NRV
             48 BYC(BA) SV03 MSC BYC(BE) KYC(BW) WYC
         """,
+        # 4 - Camp 24/7
+        """Flight Race Boat 1 Boat 2 Boat 3 Boat 4 Boat 5 Boat 6
+            1 KYC(SH) BYCÜ SV03 NRV MSC SVI
+            2 VSaW FSC DYC BYC(BE) WYC JSC
+            3 KYC(BW) RSN MYC SMCÜ BYC(BA) ASVW
+            4 KYC(BW) SV03 MYC JSC SVI BYC(BE)
+            5 RSN BYC(BA) MSC FSC DYC NRV
+            6 ASVW KYC(SH) SMCÜ WYC BYCÜ VSaW
+            7 SV03 KYC(SH) FSC BYC(BA) MYC VSaW
+            8 SVI MSC BYC(BE) RSN ASVW WYC
+            9 SMCÜ JSC NRV DYC KYC(BW) BYCÜ
+            10 BYC(BE) ASVW NRV KYC(SH) KYC(BW) FSC
+            11 BYCÜ DYC RSN SVI VSaW MYC
+            12 WYC SMCÜ BYC(BA) MSC JSC SV03
+            13 BYC(BE) SMCÜ VSaW RSN NRV SV03
+            14 FSC MYC BYCÜ ASVW JSC MSC
+            15 BYC(BA) KYC(BW) SVI WYC KYC(SH) DYC
+            16 MSC KYC(BW) ASVW VSaW SV03 DYC
+            17 JSC BYC(BE) KYC(SH) BYCÜ RSN BYC(BA)
+            18 MYC NRV WYC SVI FSC SMCÜ
+            19 SV03 RSN WYC BYCÜ FSC KYC(BW)
+            20 NRV SVI JSC BYC(BA) VSaW ASVW
+            21 DYC BYC(BE) MSC MYC SMCÜ KYC(SH)
+            22 DYC SV03 RSN JSC ASVW KYC(SH)
+            23 FSC BYC(BA) SVI SMCÜ BYC(BE) BYCÜ
+            24 MSC VSaW KYC(BW) NRV WYC MYC
+            25 SMCÜ ASVW DYC SV03 SVI FSC
+            26 WYC BYCÜ BYC(BA) MYC BYC(BE) NRV
+            27 JSC MSC KYC(BW) VSaW KYC(SH) RSN
+            28 NRV WYC SV03 ASVW MYC RSN
+            29 SVI JSC KYC(SH) KYC(BW) SMCÜ FSC
+            30 BYC(BA) DYC VSaW MSC BYCÜ BYC(BE)
+            31 BYC(BA) NRV FSC MSC RSN JSC
+            32 MYC VSaW BYC(BE) KYC(BW) SV03 SVI
+            33 BYCÜ WYC ASVW KYC(SH) DYC SMCÜ
+            34 BYCÜ BYC(BE) ASVW SV03 BYC(BA) KYC(BW)
+            35 VSaW SVI SMCÜ FSC RSN MSC
+            36 KYC(SH) MYC JSC DYC NRV WYC
+            37 SMCÜ MYC JSC BYCÜ MSC SV03
+            38 ASVW NRV SVI KYC(SH) VSaW BYC(BA)
+            39 RSN FSC DYC BYC(BE) KYC(BW) WYC
+            40 MSC FSC KYC(SH) BYC(BE) ASVW MYC
+            41 JSC VSaW BYC(BA) WYC SMCÜ KYC(BW)
+            42 SV03 RSN BYCÜ DYC NRV SVI
+            43 WYC JSC BYC(BE) ASVW MSC SVI
+            44 DYC BYC(BA) KYC(BW) RSN MYC SMCÜ
+            45 FSC KYC(SH) SV03 VSaW BYCÜ NRV
+            46 RSN KYC(SH) SV03 SVI WYC BYC(BA)
+            47 KYC(BW) BYCÜ SMCÜ NRV BYC(BE) MSC
+            48 MYC ASVW VSaW JSC FSC DYC
+        """,
+        # - 5 Münchner Yacht-Club
         """Flight Race Boat 1 Boat 2 Boat 3 Boat 4 Boat 5 Boat 6
             1 NRV BYC(BE) KYC(BW) MYC KYC(SH) JSC
             2 WYC SV03 VSaW ASVW MSC BYCÜ
@@ -270,6 +275,7 @@ def create_pairing_list(event):
             47 DYC BYC(BE) BYC(BA) MYC ASVW KYC(SH)16
             48 SMCÜ FSC WYC BYCÜ SV03 VSaW
         """,
+        # 6 - Bayerischer Yacht-Club
         """Flight Race Boat 1 Boat 2 Boat 3 Boat 4 Boat 5 Boat 6
             1 KYC(SH) BYCÜ SV03 NRV MSC SVI
             2 VSaW FSC DYC BYC(BE) WYC JSC
@@ -323,7 +329,6 @@ def create_pairing_list(event):
     ]
 
     # Parse the data
-    print(len(data))
     lines = data[event].strip().split('\n')
     parsed_data = []
 
