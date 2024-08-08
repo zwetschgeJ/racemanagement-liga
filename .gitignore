@@ -1,4 +1,9 @@
-*secrets.toml
-.idea/*
-venv/
+.idea
+.DS_Store
+.idea
+
+
 __pycache__
+
+venv/
+*secrets.toml
