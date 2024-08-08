@@ -3,7 +3,7 @@ import numpy as np
 import streamlit as st
 import plotly.graph_objects as go
 
-from src.utils_sorting import sort_results
+from src.utils_sorting import sort_results, create_pairing_list
 
 # Load confing
 from config import *
@@ -124,28 +124,6 @@ def create_flow_plot(result_df_: pd.DataFrame):
     return fig
 
 
-def display_event(title: str, data_event: str) -> None:
-    st.write("### Ergebnisse " + title)
-
-    data = st.session_state[data_event].astype(str)
-    data = data.replace("nan", "0")
-
-    st.dataframe(
-        data,
-        height=670,
-        use_container_width=True,
-        hide_index=True
-    )
-
-    df_ = calculate_place_flow(data)
-
-    plot_flow = create_flow_plot(df_)
-
-    st.write("### Flow")
-    st.plotly_chart(plot_flow)
-
-
-
 def compute_overall():
     overall_results = pd.DataFrame({'Teams': TEAMS})
 
@@ -164,3 +142,62 @@ def compute_overall():
         pass
     overall_results.insert(0, 'Rank', range(1, overall_results.shape[0] + 1))
     st.dataframe(overall_results, height=750, use_container_width=True, hide_index=True,)
+
+
+def highlight_fleet(_, team_in_fleet: list[bool], color: str):
+    return ['color:'+color + '; font-weight:bold' if team else '' for team in team_in_fleet]
+
+
+def add_pairinglist_font(df: pd.DataFrame, event: int) -> pd.DataFrame:
+
+    pairing_list, _ = create_pairing_list(event=event)
+    pairing_list = pairing_list.drop(["flight", "Race"], axis=1)
+
+    pairing_list = pairing_list.replace("BYC(BA)", "BYC (BA)")
+    pairing_list = pairing_list.replace("BYC(BE)", "BYC (BE)")
+
+    pairing_list = pairing_list.replace("KYC(SH)", "KYC (SH)")
+    pairing_list = pairing_list.replace("KYC(BW)", "KYC (BW)")
+    
+    teams = df["Teams"].values
+
+    flight = 1
+    style_df = df.style
+
+    colors = ["red", "blue", "green"]
+    # colors = ["#FFCCCB", "#ADD8E6", "#90EE90"]
+
+    for i in range(pairing_list.shape[0]):
+        team_in_fleet = np.isin(teams, pairing_list.iloc[i, :].values)
+        
+        column_name = 'Flight ' + str(flight)
+        
+        color = colors[i % len(colors)]
+        
+        style_df = style_df.apply(highlight_fleet, subset=[column_name], team_in_fleet=team_in_fleet, color=color)
+
+        if (i + 1) % 3 == 0:
+            flight += 1
+    
+    return style_df
+
+
+def display_event(title: str, data_event: str) -> None:
+    st.write("### Ergebnisse " + title)
+
+    data = st.session_state[data_event].astype(str)
+    data = data.replace("nan", "0")
+
+    st.dataframe(
+        add_pairinglist_font(df=data,event=int(data_event[-1])),
+        height=670,
+        use_container_width=True,
+        hide_index=True
+    )
+
+    df_ = calculate_place_flow(data)
+
+    plot_flow = create_flow_plot(df_)
+
+    st.write("### Flow")
+    st.plotly_chart(plot_flow)
