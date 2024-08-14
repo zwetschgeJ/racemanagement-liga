@@ -21,3 +21,5 @@ link_event_01 = "19xaFNpplaFOW7dS-Efir9EMsDPV8oy4w6X6fTzO1uXo"
 link_event_02 = "1rtMz8LQRaLdPvqoNXrbG30_DvkcmnQx7x_dJQijoJyY"
 link_event_03 = "1LeFExyFaH101326yN82BKjLaPmX0uKKTK4g0lQvBquY"
 
+
+DISPLAY_COLORCODING = False

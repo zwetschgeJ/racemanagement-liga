@@ -27,6 +27,7 @@ def get_data_excel() -> None:
     return df
 
 
+@st.cache_data(ttl=3600) #in seconds
 def get_data_google(link_id: str, stupid_formatting: bool = False) -> pd.DataFrame:
     if stupid_formatting:
         df = pd.read_csv(
@@ -141,7 +142,13 @@ def compute_overall():
     except KeyError:
         pass
     overall_results.insert(0, 'Rank', range(1, overall_results.shape[0] + 1))
-    st.dataframe(overall_results, height=750, use_container_width=True, hide_index=True,)
+
+    st.dataframe(
+        overall_results,
+        height=665,
+        use_container_width=True,
+        hide_index=True,
+    )
 
 
 def highlight_fleet(_, team_in_fleet: list[bool], color: str):
@@ -188,12 +195,20 @@ def display_event(title: str, data_event: str) -> None:
     data = st.session_state[data_event].astype(str)
     data = data.replace("nan", "0")
 
-    st.dataframe(
-        add_pairinglist_font(df=data,event=int(data_event[-1])),
-        height=670,
-        use_container_width=True,
-        hide_index=True
-    )
+    if DISPLAY_COLORCODING:
+        st.dataframe(
+            add_pairinglist_font(df=data,event=int(data_event[-1])),
+            height=665,
+            use_container_width=True,
+            hide_index=True
+        )
+    else:
+        st.dataframe(
+            data,
+            height=665,
+            use_container_width=True,
+            hide_index=True
+        )
 
     df_ = calculate_place_flow(data)
 
