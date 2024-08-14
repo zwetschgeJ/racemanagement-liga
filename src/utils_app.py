@@ -27,7 +27,7 @@ def get_data_excel() -> None:
     return df
 
 
-@st.cache_data(ttl=3600) #in seconds
+@st.cache_data(ttl=REFRESH_TIME)
 def get_data_google(link_id: str, stupid_formatting: bool = False) -> pd.DataFrame:
     if stupid_formatting:
         df = pd.read_csv(
@@ -65,6 +65,9 @@ def initialize_states() -> None:
    
    df = get_data_google(link_id=link_event_03)
    st.session_state["data_event_03"] = sort_results(result_df=df)
+   
+   df = get_data_google(link_id=link_test)
+   st.session_state["data_event_04"] = sort_results(result_df=df)
 
 def calculate_place_flow(result_df: pd.DataFrame) -> pd.DataFrame:
     df_sorted_index = pd.DataFrame()
@@ -193,18 +196,28 @@ def display_event(title: str, data_event: str) -> None:
     st.write("### Ergebnisse " + title)
 
     data = st.session_state[data_event].astype(str)
-    data = data.replace("nan", "0")
+    data = data.replace("nan","0")
+
+    # Replace 0 with "" in columns that only contain 0
+    data_to_show = data.copy()
+    
+    for column in race_columns:
+        try:
+            if data_to_show[column].astype(float).sum() == 0:
+               data_to_show[column] = data_to_show[column].str.replace("0", "")  
+        except:
+            pass
 
     if DISPLAY_COLORCODING:
         st.dataframe(
-            add_pairinglist_font(df=data,event=int(data_event[-1])),
+            add_pairinglist_font(df=data_to_show,event=int(data_event[-1])),
             height=665,
             use_container_width=True,
             hide_index=True
         )
     else:
         st.dataframe(
-            data,
+            data_to_show,
             height=665,
             use_container_width=True,
             hide_index=True

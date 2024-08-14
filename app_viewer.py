@@ -39,5 +39,11 @@ with tab_event3:
         data_event="data_event_03"
     )
 
+with tab_event4:
+    display_event(
+        title="Event 04 Kiel - Testdata",
+        data_event="data_event_04"
+    )
+
 with tab_overall:
     compute_overall()
