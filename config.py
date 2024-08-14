@@ -23,3 +23,4 @@ link_event_03 = "1LeFExyFaH101326yN82BKjLaPmX0uKKTK4g0lQvBquY"
 
 
 DISPLAY_COLORCODING = False
+REFRESH_TIME = 60 # in seconds 
