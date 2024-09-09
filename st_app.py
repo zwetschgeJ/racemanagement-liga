@@ -14,20 +14,18 @@ def init_connection():
     uri = f"mongodb+srv://{st.secrets['mongo']['db_username']}:{st.secrets['mongo']['db_password']}@{st.secrets['mongo']['cluster_name']}.3rpqm.mongodb.net/dsbl?retryWrites=true&w=majority"
     return MongoClient(uri)
 
-pymongo = True
 
-if pymongo:
-    client = init_connection()
+client = init_connection()
 
-    try:
-        client.admin.command('ping')
-    except Exception as e:
-        print(e)
+try:
+    client.admin.command('ping')
+except Exception as e:
+    print(e)
 
-    db = client.dsbl
-    collection_names = db.list_collection_names()
-    collection_names.sort()
-    EVENTS = len(collection_names)
+db = client.dsbl
+collection_names = db.list_collection_names()
+collection_names.sort()
+EVENTS = len(collection_names)
 
 # Initialize session state for data storage
 if 'data' not in st.session_state:
@@ -63,18 +61,12 @@ def write_to_pymongo():
                               columns=st.session_state.data[f'Event {event+1}']['results']['columns'],)
         collection = db[collection_names[event]]
         collection.delete_many({})
-
+        print(collection_names[event])
+        print(df.head())
         data_dict = df.to_dict("records")
         collection.insert_many(data_dict)
 
-
-
-if st.session_state.data['Event 1'] == {}:
-    if pymongo:
-        initialize_from_pymongo()
-    else:
-        initialize_pairing_result()
-
+initialize_from_pymongo()
 
 selected_event = st.sidebar.selectbox('Select Event', options=[f'Event {i}' for i in range(1, EVENTS + 1)], index=0)
 
@@ -125,10 +117,12 @@ if st.session_state.data[selected_event]['pairing_list'] is not None:
         for b, r in zip(range(1,utils.BOATS+1),results):
             if r:
                 team = race_details[f'Boat{b}'].values[0]
+                team_lookup = team.replace('(', ' (')
                 flight = utils.get_flight(selected_race)
-                results_df.loc[results_df['Teams'] == team, f'Flight {flight}'] = r
+                results_df.loc[results_df['Teams'] == team_lookup, f'Flight {flight}'] = r
 
         st.session_state.data[selected_event]['results'] = results_df.reset_index(drop=True).to_dict('split')
+        write_to_pymongo()
 
     team = st.sidebar.selectbox('Select Team', options=results_df['Teams'].sort_values(), index=0)
     scp = st.sidebar.number_input('Enter SCP', value=0)
@@ -139,6 +133,7 @@ if st.session_state.data[selected_event]['pairing_list'] is not None:
             scp = np.nan
         results_df.loc[row_index, 'SCP'] = scp
         st.session_state.data[selected_event]['results'] = results_df.reset_index(drop=True).to_dict('split')
+        write_to_pymongo()
 
 # Display updated results
 if st.session_state.data[selected_event]['results'] is not None:
@@ -157,25 +152,30 @@ if st.session_state.data[selected_event]['results'] is not None:
     st.dataframe(results_df, height=750, use_container_width=True, hide_index=True,)
     st.sidebar.download_button(label="Download Results", data=results_df.to_csv(), file_name='results.csv', mime='text/csv')
 
-# TODO: save results to MongoDB
-write_to_pymongo()
-
 
 #Overall ranking
 st.text('Overall Results')
 overall_results = pd.DataFrame({'Teams': utils.TEAMS})
+sum_columns = []
+max_event = 0
 for event in range(1, EVENTS + 1):
+    # TODO: ignore events with 0 points
     result_df = pd.DataFrame(st.session_state.data[f'Event {event}']['results']['data'],
                               columns=st.session_state.data[f'Event {event}']['results']['columns'],)
     result_df.reset_index(drop=True, inplace=True)
     result_df = utils.sort_results(result_df)
+    if result_df['Total'].min() == 0:
+        continue
     result_df.insert(0, 'Rank', range(1, result_df.shape[0] + 1))
     result_df.sort_values(by='Teams', inplace=True)
     overall_results['Event {}'.format(event)] = result_df['Rank'].values
+    sum_columns.append('Event {}'.format(event))
+    if event > max_event:
+        max_event = event
 
-sum_columns = ['Event {}'.format(event) for event in range(1, EVENTS + 1)]
-overall_results['Total'] = overall_results[sum_columns].sum(axis=1)
-overall_results.sort_values(by=['Total','Event {}'.format(EVENTS)], inplace=True)
+if max_event > 0:
+    overall_results['Total'] = overall_results[sum_columns].sum(axis=1)
+    overall_results.sort_values(by=['Total','Event {}'.format(max_event)], inplace=True)
 try:
     overall_results.drop(columns=['Rank'], inplace=True)
 except KeyError:

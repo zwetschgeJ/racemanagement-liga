@@ -60,6 +60,9 @@ def count_values(row):
 
 
 def sort_results(result_df):
+
+    #TODO: Add RDG
+
     result_df_copy = result_df.copy()
 
     result_df_copy.replace(BUCHSTABEN, inplace=True)
