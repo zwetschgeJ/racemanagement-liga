@@ -1,11 +1,36 @@
+import numpy as np
 import streamlit as st
 import pandas as pd
+from pymongo import MongoClient
 import utils
 from utils import BOATS, BUCHSTABEN, EVENTS
 
 st.set_page_config(layout="wide")
 st.title('Ergebnis-Manager')
 st.sidebar.title('Options')
+
+#@st.experimental_singleton(suppress_st_warning=True)
+def init_connection():
+    # TODO: use details from secrets.toml file
+    uri = f"mongodb+srv://myc_start_boat:paY3SdvIYiryr84v@cluster0.3rpqm.mongodb.net/dsbl?retryWrites=true&w=majority"
+    return MongoClient(uri)
+
+
+client = init_connection()
+
+
+
+try:
+    print("[INFO] Pinging")
+    client.admin.command('ping')
+    print("[INFO] Pinged your deployment. You successfully connected to MongoDB!")
+except Exception as e:
+    print(e)
+
+db = client.dsbl
+collection_names = db.list_collection_names()
+collection_names.sort()
+EVENTS = len(collection_names)
 
 # Initialize session state for data storage
 if 'data' not in st.session_state:
@@ -26,8 +51,18 @@ def initialize_pairing_result():
         st.session_state.data['Event {}'.format(event+1)]['results'] = results.reset_index(drop=True).to_dict('split')
 
 
+def initialize_from_pymongo():
+    for event in range(len(collection_names)):
+        pairing_list, results = utils.create_pairing_list(event)
+        results = pd.DataFrame(db[collection_names[event]].find())
+        results.drop(columns=['_id'], inplace=True)
+
+        st.session_state.data['Event {}'.format(event+1)]['pairing_list'] = pairing_list.reset_index().to_dict('split')
+        st.session_state.data['Event {}'.format(event+1)]['results'] = results.reset_index(drop=True).to_dict('split')
+
+
 if st.session_state.data['Event 1'] == {}:
-    initialize_pairing_result()
+    initialize_from_pymongo()
 
 
 selected_event = st.sidebar.selectbox('Select Event', options=[f'Event {i}' for i in range(1, EVENTS + 1)], index=0)
@@ -58,6 +93,8 @@ if st.session_state.data[selected_event]['pairing_list'] is not None:
     results = list()
     for b in range(1,utils.BOATS+1):
         team = race_details[f'Boat{b}'].values[0]
+
+        # TODO: initialize entry with value from results
         results.append(st.sidebar.selectbox(f'Boat {b} - ' + team, options=[i for i in range(1, BOATS + 1)] + list(BUCHSTABEN.keys()), index=0,))
 
 

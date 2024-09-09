@@ -11,6 +11,8 @@ BUCHSTABEN = {'OCS': BOATS + 1,
               'DSQ': BOATS + 1,
               'DNF': BOATS + 1,
               'DNC': BOATS + 1,
+              'OSC' : BOATS + 1,
+              'RDG' : 1000,
               'No result': np.nan, }
 
 
@@ -371,6 +373,8 @@ def sort_results(result_df):
 
     columns_to_sum = ['SCP']
     columns_to_sum.extend([f'Flight {i}' for i in range(1, FLIGHTS + 1)])
+    for col in columns_to_sum:
+        result_df_copy[col] = result_df_copy[col].astype(float)
     result_df_copy['Total'] = result_df_copy[columns_to_sum].sum(axis=1)
     counts_df = result_df_copy.apply(count_values, axis=1)
     result_df_copy = pd.concat([result_df_copy, counts_df], axis=1, )
