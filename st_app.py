@@ -21,7 +21,6 @@ if pymongo:
 
     try:
         client.admin.command('ping')
-        print("[INFO] Pinged your deployment. You successfully connected to MongoDB!")
     except Exception as e:
         print(e)
 
@@ -60,9 +59,8 @@ def initialize_from_pymongo():
 
 def write_to_pymongo():
     for event in range(len(collection_names)):
-        df = pd.DataFrame(st.session_state.data[selected_event]['results']['data'],
-                              columns=st.session_state.data[selected_event]['results']['columns'],)
-        print(df.head())
+        df = pd.DataFrame(st.session_state.data[f'Event {event+1}']['results']['data'],
+                              columns=st.session_state.data[f'Event {event+1}']['results']['columns'],)
         collection = db[collection_names[event]]
         collection.delete_many({})
 
