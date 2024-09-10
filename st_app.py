@@ -105,6 +105,8 @@ if st.session_state.data[selected_event]['pairing_list'] is not None:
                 team = race_details[f'Boat{b}'].values[0]
                 team_lookup = team.replace('(', ' (')
                 flight = utils.get_flight(selected_race)
+                if r == "No result":
+                    r = np.nan
                 results_df.loc[results_df['Teams'] == team_lookup, f'Flight {flight}'] = r
 
         st.session_state.data[selected_event]['results'] = results_df.reset_index(drop=True).to_dict('split')
