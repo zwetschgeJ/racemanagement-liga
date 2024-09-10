@@ -9,11 +9,10 @@ st.set_page_config(layout="wide")
 st.title('Ergebnis-Manager')
 st.sidebar.title('Options')
 
+@st.cache_resource
 def init_connection():
-    # TODO: use details from secrets.toml file
     uri = f"mongodb+srv://{st.secrets['mongo']['db_username']}:{st.secrets['mongo']['db_password']}@{st.secrets['mongo']['cluster_name']}.3rpqm.mongodb.net/dsbl?retryWrites=true&w=majority"
     return MongoClient(uri)
-
 
 client = init_connection()
 
@@ -31,9 +30,6 @@ EVENTS = len(collection_names)
 if 'data' not in st.session_state:
     st.session_state.data = {f'Event {event}': {} for event in range(1, EVENTS + 1)}
 
-# BOATS = st.sidebar.number_input('Number of Boats', value=BOATS, key='BOATS')
-# EVENTS = st.sidebar.number_input('Number of Events', value=EVENTS, key='EVENTS')
-
 st.sidebar.divider()
 
 
@@ -48,23 +44,16 @@ def initialize_pairing_result():
 def initialize_from_pymongo():
     for event in range(0, len(collection_names)):
         pairing_list, results = utils.create_pairing_list(event)
-        results = pd.DataFrame(db[collection_names[event]].find())
-        results.drop(columns=['_id'], inplace=True)
+        results = pd.DataFrame(list(db[collection_names[event]].find()))
 
         st.session_state.data['Event {}'.format(event+1)]['pairing_list'] = pairing_list.reset_index().to_dict('split')
         st.session_state.data['Event {}'.format(event+1)]['results'] = results.reset_index(drop=True).to_dict('split')
 
 
-def write_to_pymongo():
-    for event in range(len(collection_names)):
-        df = pd.DataFrame(st.session_state.data[f'Event {event+1}']['results']['data'],
-                              columns=st.session_state.data[f'Event {event+1}']['results']['columns'],)
-        collection = db[collection_names[event]]
-        collection.delete_many({})
-        print(collection_names[event])
-        print(df.head())
-        data_dict = df.to_dict("records")
-        collection.insert_many(data_dict)
+def write_to_pymongo(df, event):
+    collection = db[collection_names[event]]
+    collection.delete_many({})
+    collection.insert_many(df.to_dict("records"))
 
 initialize_from_pymongo()
 
@@ -91,13 +80,10 @@ if st.session_state.data[selected_event]['pairing_list'] is not None:
     results_df.reset_index(drop=True, inplace=True)
     selected_race = st.sidebar.selectbox('Select Race', options=pairing_list_df['Race'], index=0)
 
-    # TODO: get race details based on Event information
     race_details = pairing_list_df[pairing_list_df['Race'] == selected_race]
     results = list()
     for b in range(1,utils.BOATS+1):
         team = race_details[f'Boat{b}'].values[0]
-
-        # TODO: initialize entry with value from results
         result_options = [i for i in range(1, BOATS + 1)] + list(BUCHSTABEN.keys())
         flight = utils.get_flight(selected_race)
         team_lookup = team.replace('(', ' (')
@@ -122,7 +108,7 @@ if st.session_state.data[selected_event]['pairing_list'] is not None:
                 results_df.loc[results_df['Teams'] == team_lookup, f'Flight {flight}'] = r
 
         st.session_state.data[selected_event]['results'] = results_df.reset_index(drop=True).to_dict('split')
-        write_to_pymongo()
+        write_to_pymongo(results_df, int(selected_event.split()[1]) - 1)
 
     team = st.sidebar.selectbox('Select Team', options=results_df['Teams'].sort_values(), index=0)
     scp = st.sidebar.number_input('Enter SCP', value=0)
@@ -133,7 +119,7 @@ if st.session_state.data[selected_event]['pairing_list'] is not None:
             scp = np.nan
         results_df.loc[row_index, 'SCP'] = scp
         st.session_state.data[selected_event]['results'] = results_df.reset_index(drop=True).to_dict('split')
-        write_to_pymongo()
+        write_to_pymongo(results_df, int(selected_event.split()[1]) - 1)
 
 # Display updated results
 if st.session_state.data[selected_event]['results'] is not None:
@@ -148,6 +134,10 @@ if st.session_state.data[selected_event]['results'] is not None:
         pass
     results_df.insert(0, 'Rank', range(1, results_df.shape[0] + 1))
     results_df.fillna('-', inplace=True)
+    try:
+        results_df.drop(columns=['_id'], inplace=True)
+    except KeyError:
+        pass
     st.text('Results for {}'.format(selected_event))
     st.dataframe(results_df, height=750, use_container_width=True, hide_index=True,)
     st.sidebar.download_button(label="Download Results", data=results_df.to_csv(), file_name='results.csv', mime='text/csv')
@@ -159,7 +149,6 @@ overall_results = pd.DataFrame({'Teams': utils.TEAMS})
 sum_columns = []
 max_event = 0
 for event in range(1, EVENTS + 1):
-    # TODO: ignore events with 0 points
     result_df = pd.DataFrame(st.session_state.data[f'Event {event}']['results']['data'],
                               columns=st.session_state.data[f'Event {event}']['results']['columns'],)
     result_df.reset_index(drop=True, inplace=True)
