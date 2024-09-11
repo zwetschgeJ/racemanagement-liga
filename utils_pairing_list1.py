@@ -1,4 +1,23 @@
-data = [
+import numpy as np
+
+DBNAME = "dsbl"
+
+BOATS = 6
+FLIGHTS = 16
+
+TEAMS = ['ASVW', 'BYC(BA)', 'BYC(BE)', 'BYCÜ', 'DYC', 'FSC', 'JSC', 'KYC(BW)', 'KYC(SH)', 'MSC', 'MYC', 'NRV', 'RSN',
+         'SMCÜ', 'SV03', 'SVI', 'VSaW', 'WYC']
+
+BUCHSTABEN = {'OCS': BOATS + 1,
+              'DSQ': BOATS + 1,
+              'DNF': BOATS + 1,
+              'DNC': BOATS + 1,
+              'OSC' : BOATS + 1,
+              'RET': BOATS + 1,
+              'NSC': BOATS + 1,
+              'No result': np.nan, }
+
+PAIRINGLIST = [
         # 1 Berlin
         """Flight Race Boat 1 Boat 2 Boat 3 Boat 4 Boat 5 Boat 6
 1 BYC(BA) RSN SMCÜ WYC KYC(SH) DYC

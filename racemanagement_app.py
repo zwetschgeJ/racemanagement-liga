@@ -1,9 +1,8 @@
-import numpy as np
 import streamlit as st
 import pandas as pd
 from pymongo import MongoClient
 import utils
-from utils import BOATS, BUCHSTABEN, EVENTS
+from utils_pairing_list1 import *
 
 st.set_page_config(layout="wide")
 st.title('Ergebnis-Manager')
@@ -22,7 +21,7 @@ try:
 except Exception as e:
     print(e)
 
-db = client.dsbl
+db = client[DBNAME]
 collection_names = db.list_collection_names()
 collection_names.sort()
 EVENTS = len(collection_names)
@@ -34,14 +33,14 @@ if 'data' not in st.session_state:
 # Function to create pairing list and results (mimics the generate_pairing_list callback)
 def initialize_pairing_result():
     for event in range(EVENTS):
-        pairing_list, results = utils.create_pairing_list(event)
+        pairing_list, results = utils.create_pairing_list(event, PAIRINGLIST, FLIGHTS, TEAMS)
         st.session_state.data['Event {}'.format(event+1)]['pairing_list'] = pairing_list.reset_index().to_dict('split')
         st.session_state.data['Event {}'.format(event+1)]['results'] = results.reset_index(drop=True).to_dict('split')
 
 
 def initialize_from_pymongo():
     for event in range(0, len(collection_names)):
-        pairing_list, results = utils.create_pairing_list(event)
+        pairing_list, results = utils.create_pairing_list(event, PAIRINGLIST, FLIGHTS, TEAMS)
         results = pd.DataFrame(list(db[collection_names[event]].find()))
 
         st.session_state.data['Event {}'.format(event+1)]['pairing_list'] = pairing_list.reset_index().to_dict('split')
@@ -74,10 +73,10 @@ if st.session_state.data[selected_event]['pairing_list'] is not None:
 
     race_details = pairing_list_df[pairing_list_df['Race'] == selected_race]
     results = list()
-    for b in range(1,utils.BOATS+1):
+    for b in range(1, BOATS+1):
         team = race_details[f'Boat{b}'].values[0]
         result_options = [i for i in range(1, BOATS + 1)] + list(BUCHSTABEN.keys())
-        flight = utils.get_flight(selected_race)
+        flight = utils.get_flight(selected_race, TEAMS, BOATS)
         team_lookup = team.replace('(', ' (')
         current_result = results_df.loc[results_df['Teams'] == team_lookup, f'Flight {flight}']
         try:
@@ -92,11 +91,11 @@ if st.session_state.data[selected_event]['pairing_list'] is not None:
 
 
     if st.sidebar.button('Update Results'):
-        for b, r in zip(range(1,utils.BOATS+1),results):
+        for b, r in zip(range(1, BOATS+1),results):
             if r:
                 team = race_details[f'Boat{b}'].values[0]
                 team_lookup = team.replace('(', ' (')
-                flight = utils.get_flight(selected_race)
+                flight = utils.get_flight(selected_race, TEAMS, BOATS)
                 if r == "No result":
                     r = np.nan
                 results_df.loc[results_df['Teams'] == team_lookup, f'Flight {flight}'] = r
@@ -124,7 +123,7 @@ if st.session_state.data[selected_event]['results'] is not None:
                               columns=st.session_state.data[selected_event]['results']['columns'],)
     results_df.reset_index(drop=True, inplace=True)
 
-    results_df = utils.sort_results(results_df)
+    results_df = utils.sort_results(results_df, FLIGHTS, BOATS, BUCHSTABEN)
     try:
         results_df.drop(columns=['Rank'], inplace=True)
     except KeyError:
@@ -143,14 +142,14 @@ if st.session_state.data[selected_event]['results'] is not None:
 
 #Overall ranking
 st.text('Overall Results')
-overall_results = pd.DataFrame({'Teams': utils.TEAMS})
+overall_results = pd.DataFrame({'Teams': TEAMS})
 sum_columns = []
 max_event = 0
 for event in range(1, EVENTS + 1):
     result_df = pd.DataFrame(st.session_state.data[f'Event {event}']['results']['data'],
                               columns=st.session_state.data[f'Event {event}']['results']['columns'],)
     result_df.reset_index(drop=True, inplace=True)
-    result_df = utils.sort_results(result_df)
+    result_df = utils.sort_results(result_df, FLIGHTS, BOATS, BUCHSTABEN)
     if result_df['Total'].min() == 0:
         continue
     result_df.insert(0, 'Rank', range(1, result_df.shape[0] + 1))

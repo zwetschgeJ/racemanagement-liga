@@ -1,27 +1,12 @@
 import numpy as np
 import pandas as pd
-import utils_pairing_list
-
-BOATS = 6
-FLIGHTS = 16
-EVENTS = 6
-TEAMS = ['ASVW', 'BYC(BA)', 'BYC(BE)', 'BYCÜ', 'DYC', 'FSC', 'JSC', 'KYC(BW)', 'KYC(SH)', 'MSC', 'MYC', 'NRV', 'RSN',
-         'SMCÜ', 'SV03', 'SVI', 'VSaW', 'WYC']
-
-BUCHSTABEN = {'OCS': BOATS + 1,
-              'DSQ': BOATS + 1,
-              'DNF': BOATS + 1,
-              'DNC': BOATS + 1,
-              'OSC' : BOATS + 1,
-              'No result': np.nan, }
 
 
-def create_pairing_list(event):
+def create_pairing_list(event, data, flights, teams):
     '''
     Temporary function to create (hard-coded) pairing list
     :return: Pairing list as a pandas DataFrame
     '''
-    data = utils_pairing_list.data
 
     # Parse the data
     lines = data[event].strip().split('\n')
@@ -41,10 +26,10 @@ def create_pairing_list(event):
     df = pd.DataFrame(parsed_data, columns=columns)
     df['flight'] = [number for number in range(1, 17) for _ in range(3)]
 
-    results_dict = {'Teams': TEAMS, 'SCP': [0] * len(TEAMS)}
-    for flight in range(1, FLIGHTS + 1):
-        results_dict[f'Flight {flight}'] = [np.nan] * len(TEAMS)
-    results_dict['Total'] = [0] * len(TEAMS)
+    results_dict = {'Teams': teams, 'SCP': [0] * len(teams)}
+    for flight in range(1, flights + 1):
+        results_dict[f'Flight {flight}'] = [np.nan] * len(teams)
+    results_dict['Total'] = [0] * len(teams)
     results = pd.DataFrame(results_dict)
 
     return df, results
@@ -72,15 +57,15 @@ def replace_rdg(result_df, value="RDG", mode="all"):
     return result_df
 
 
-def sort_results(result_df):
+def sort_results(result_df, flights, boats, buchstaben):
     result_df_copy = result_df.copy()
 
-    result_df_copy.replace(BUCHSTABEN, inplace=True)
+    result_df_copy.replace(buchstaben, inplace=True)
     result_df_copy.replace('-', np.nan, inplace=True)
     result_df_copy = replace_rdg(result_df_copy)
 
     columns_to_sum = ['SCP']
-    columns_to_sum.extend([f'Flight {i}' for i in range(1, FLIGHTS + 1)])
+    columns_to_sum.extend([f'Flight {i}' for i in range(1, flights + 1)])
     for col in columns_to_sum:
         result_df_copy[col] = result_df_copy[col].astype(float)
 
@@ -89,12 +74,12 @@ def sort_results(result_df):
     result_df_copy = pd.concat([result_df_copy, counts_df], axis=1, )
 
     sort_column_list = ['Total']
-    sort_column_list.extend([i for i in range(1, BOATS + 2)])
-    sort_column_list.extend(['Flight {}'.format(i) for i in range(FLIGHTS, 1, -1)])
+    sort_column_list.extend([i for i in range(1, boats + 2)])
+    sort_column_list.extend(['Flight {}'.format(i) for i in range(flights, 1, -1)])
 
     sort_column_order_list = [True]
-    sort_column_order_list.extend([False for i in range(1, BOATS + 2)])
-    sort_column_order_list.extend([True for i in range(FLIGHTS, 1, -1)])
+    sort_column_order_list.extend([False for i in range(1, boats + 2)])
+    sort_column_order_list.extend([True for i in range(flights, 1, -1)])
 
     result_df_copy.sort_values(by=sort_column_list, ascending=sort_column_order_list, inplace=True)
 
@@ -105,8 +90,8 @@ def sort_results(result_df):
     return result_df
 
 
-def get_flight(race):
-    return int(np.ceil(race / (len(TEAMS) / BOATS)))
+def get_flight(race, teams, boats):
+    return int(np.ceil(race / (len(teams) / boats)))
 
 
 def add_results(result_df):
