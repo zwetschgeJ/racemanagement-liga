@@ -3,7 +3,7 @@ import pandas as pd
 import utils_pairing_list
 
 BOATS = 6
-FLIGHTS = 3
+FLIGHTS = 16
 EVENTS = 6
 TEAMS = ['ASVW', 'BYC(BA)', 'BYC(BE)', 'BYCÜ', 'DYC', 'FSC', 'JSC', 'KYC(BW)', 'KYC(SH)', 'MSC', 'MYC', 'NRV', 'RSN',
          'SMCÜ', 'SV03', 'SVI', 'VSaW', 'WYC']
@@ -13,7 +13,6 @@ BUCHSTABEN = {'OCS': BOATS + 1,
               'DNF': BOATS + 1,
               'DNC': BOATS + 1,
               'OSC' : BOATS + 1,
-              #'RDG' : 3,
               'No result': np.nan, }
 
 
@@ -64,6 +63,7 @@ def replace_rdg(result_df, value="RDG", mode="all"):
     for row, col in zip(rows, cols):
         result_df_copy = result_df.copy()
         result_df_copy["SCP"] = np.nan
+        result_df_copy["_id"] = np.nan
         result_df_copy["Total"] = np.nan
         row_values = result_df_copy.iloc[row, :].apply(pd.to_numeric, errors='coerce')
         mean_value = row_values[row_values.notna()].mean()
@@ -73,9 +73,6 @@ def replace_rdg(result_df, value="RDG", mode="all"):
 
 
 def sort_results(result_df):
-
-    #TODO: Add RDG
-
     result_df_copy = result_df.copy()
 
     result_df_copy.replace(BUCHSTABEN, inplace=True)
@@ -86,6 +83,7 @@ def sort_results(result_df):
     columns_to_sum.extend([f'Flight {i}' for i in range(1, FLIGHTS + 1)])
     for col in columns_to_sum:
         result_df_copy[col] = result_df_copy[col].astype(float)
+
     result_df_copy['Total'] = result_df_copy[columns_to_sum].sum(axis=1)
     counts_df = result_df_copy.apply(count_values, axis=1)
     result_df_copy = pd.concat([result_df_copy, counts_df], axis=1, )
