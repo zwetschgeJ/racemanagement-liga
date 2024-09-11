@@ -4,6 +4,8 @@ from pymongo import MongoClient
 import utils
 from utils_pairing_list1 import *
 
+TEAMS.sort()
+
 st.set_page_config(layout="wide")
 st.title('Ergebnis-Manager')
 st.sidebar.title('Options')
@@ -129,12 +131,15 @@ if st.session_state.data[selected_event]['results'] is not None:
     except KeyError:
         pass
     results_df.insert(0, 'Rank', range(1, results_df.shape[0] + 1))
+    # TODO: Drop columns with all NaN values execept column scp
+    # results_df.dropna(subset=[f'Flight {i}' for i in range(1, FLIGHTS + 1)], axis='columns', inplace=True)
     results_df.fillna('-', inplace=True)
     try:
         results_df.drop(columns=['_id'], inplace=True)
     except KeyError:
         pass
     st.text('Results for {}'.format(selected_event))
+
     st.dataframe(results_df, height=750, use_container_width=True, hide_index=True,)
     st.sidebar.divider()
     st.sidebar.download_button(label="Download Results", data=results_df.to_csv(), file_name='results.csv', mime='text/csv')

@@ -4,6 +4,8 @@ from pymongo import MongoClient
 import utils
 from utils_pairing_list2 import *
 
+TEAMS.sort()
+
 st.set_page_config(layout="wide")
 st.title('Ergebnis-Manager')
 st.sidebar.title('Options')
