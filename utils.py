@@ -3,7 +3,7 @@ import pandas as pd
 import utils_pairing_list
 
 BOATS = 6
-FLIGHTS = 16
+FLIGHTS = 3
 EVENTS = 6
 TEAMS = ['ASVW', 'BYC(BA)', 'BYC(BE)', 'BYCÜ', 'DYC', 'FSC', 'JSC', 'KYC(BW)', 'KYC(SH)', 'MSC', 'MYC', 'NRV', 'RSN',
          'SMCÜ', 'SV03', 'SVI', 'VSaW', 'WYC']
@@ -13,7 +13,7 @@ BUCHSTABEN = {'OCS': BOATS + 1,
               'DNF': BOATS + 1,
               'DNC': BOATS + 1,
               'OSC' : BOATS + 1,
-              'RDG' : 1000,
+              #'RDG' : 3,
               'No result': np.nan, }
 
 
@@ -54,9 +54,22 @@ def create_pairing_list(event):
 def count_values(row):
     # You can adjust this list based on the values you're interested in
     values_of_interest = [i for i in range(1, 6 + 2)]
-    # TODO look only in Race{}.format() columns
     counts = {value: (row == value).sum() for value in values_of_interest}
     return pd.Series(counts)
+
+
+def replace_rdg(result_df, value="RDG", mode="all"):
+    rows, cols = (result_df == value).to_numpy().nonzero()
+
+    for row, col in zip(rows, cols):
+        result_df_copy = result_df.copy()
+        result_df_copy["SCP"] = np.nan
+        result_df_copy["Total"] = np.nan
+        row_values = result_df_copy.iloc[row, :].apply(pd.to_numeric, errors='coerce')
+        mean_value = row_values[row_values.notna()].mean()
+        result_df.iloc[row, col] = round(mean_value, 1)
+
+    return result_df
 
 
 def sort_results(result_df):
@@ -67,6 +80,7 @@ def sort_results(result_df):
 
     result_df_copy.replace(BUCHSTABEN, inplace=True)
     result_df_copy.replace('-', np.nan, inplace=True)
+    result_df_copy = replace_rdg(result_df_copy)
 
     columns_to_sum = ['SCP']
     columns_to_sum.extend([f'Flight {i}' for i in range(1, FLIGHTS + 1)])
