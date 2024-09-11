@@ -35,10 +35,9 @@ def create_pairing_list(event, data, flights, teams):
     return df, results
 
 
-def count_values(row):
-    # You can adjust this list based on the values you're interested in
+def count_values(row, flights):
     values_of_interest = [i for i in range(1, 6 + 2)]
-    counts = {value: (row == value).sum() for value in values_of_interest}
+    counts = {value: (row[[f'Flight {i}' for i in range(1,flights+1)]] == value).sum() for value in values_of_interest}
     return pd.Series(counts)
 
 
@@ -70,7 +69,7 @@ def sort_results(result_df, flights, boats, buchstaben):
         result_df_copy[col] = result_df_copy[col].astype(float)
 
     result_df_copy['Total'] = result_df_copy[columns_to_sum].sum(axis=1)
-    counts_df = result_df_copy.apply(count_values, axis=1)
+    counts_df = result_df_copy.apply(count_values, axis=1, flights=flights)
     result_df_copy = pd.concat([result_df_copy, counts_df], axis=1, )
 
     sort_column_list = ['Total']
