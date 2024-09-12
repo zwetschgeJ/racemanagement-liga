@@ -26,7 +26,7 @@ def create_pairing_list(event, data, flights, teams):
     df = pd.DataFrame(parsed_data, columns=columns)
     df['flight'] = [number for number in range(1, 17) for _ in range(3)]
 
-    results_dict = {'Teams': teams, 'SCP': [0] * len(teams)}
+    results_dict = {'Teams': teams, 'SCP': [np.nan] * len(teams)}
     for flight in range(1, flights + 1):
         results_dict[f'Flight {flight}'] = [np.nan] * len(teams)
     results_dict['Total'] = [0] * len(teams)
