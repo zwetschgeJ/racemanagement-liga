@@ -15,6 +15,7 @@ BUCHSTABEN = {'OCS': BOATS + 1,
               'OSC' : BOATS + 1,
               'RET': BOATS + 1,
               'NSC': BOATS + 1,
+              'RDG': 'RDG',
               'No result': np.nan, }
 
 PAIRINGLIST = [
@@ -228,7 +229,7 @@ PAIRINGLIST = [
         2 WYC SV03 VSaW ASVW MSC BYCÜ
         3 DYC SVI SMCÜ BYC(BA) RSN FSC
         4 DYC KYC(BW) SMCÜ BYCÜ JSC ASVW
-        5 SVI RSN KYC(SH) SV03 VSaW MYC2
+        5 SVI RSN KYC(SH) SV03 VSaW MYC
         6 FSC NRV BYC(BA) MSC BYC(BE) WYC
         7 KYC(BW) NRV SV03 RSN SMCÜ WYC
         8 JSC KYC(SH) ASVW SVI FSC MSC3
@@ -249,7 +250,7 @@ PAIRINGLIST = [
         23 SV03 RSN JSC BYC(BA) ASVW BYC(BE)8
         24 KYC(SH) WYC DYC MYC MSC SMCÜ
         25 BYC(BA) FSC VSaW KYC(BW) JSC SV03
-        26 MSC BYC(BE) RSN SMCÜ ASVW MYC9
+        26 MSC BYC(BE) RSN SMCÜ ASVW MYC
         27 BYCÜ KYC(SH) DYC WYC NRV SVI
         28 MYC MSC KYC(BW) FSC SMCÜ SVI
         29 JSC BYCÜ NRV DYC BYC(BA) SV0310

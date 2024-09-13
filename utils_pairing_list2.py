@@ -18,6 +18,7 @@ BUCHSTABEN = {'OCS': BOATS + 1,
               'OSC' : BOATS + 1,
               'RET': BOATS + 1,
               'NSC': BOATS + 1,
+              'RDG': 'RDG',
               'No result': np.nan, }
 
 PAIRINGLIST = [
