@@ -2,6 +2,8 @@ import numpy as np
 
 DBNAME = "dsbl"
 
+EVENTNAMES = ['1 - Berlin', '2 - Warnemünde', '3 - Hotel Kieler Yacht Club', '4 - Camp 24-7', '5 - Münchner Yacht-Club', '6 - Bayerischer Yacht-Club']
+
 BOATS = 6
 FLIGHTS = 16
 
