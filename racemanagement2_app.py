@@ -42,7 +42,7 @@ elif selected_league == leagues[1]:
     TEAMS = liga2.TEAMS
     BUCHSTABEN = liga2.BUCHSTABEN
     PAIRINGLIST = liga2.PAIRINGLIST
-print(DBNAME)
+
 
 TEAMS.sort()
 
@@ -52,7 +52,7 @@ collection_names = db.list_collection_names()
 collection_names.sort()
 EVENTS = len(collection_names)
 
-selected_event = st.sidebar.selectbox('Select Event', options=EVENTNAMES, index=0)
+selected_event = st.sidebar.selectbox('Select Event', options=EVENTNAMES, index=EVENTS - 1)
 
 # Initialize session state for data storage
 st.session_state.data = {event: {} for event in EVENTNAMES}
