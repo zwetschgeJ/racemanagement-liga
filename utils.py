@@ -59,7 +59,7 @@ def replace_rdg(result_df, value="RDG", mode="all"):
 def sort_results(result_df, flights, boats, buchstaben):
     result_df_copy = result_df.copy()
 
-    result_df_copy.replace(buchstaben, inplace=True)
+    result_df_copy.replace(buchstaben, inplace=True) # FIXME: FutureWarning
     result_df_copy.replace('-', np.nan, inplace=True)
     result_df_copy = replace_rdg(result_df_copy)
 
